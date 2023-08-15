@@ -7,6 +7,7 @@ terraform {
   required_version = ">= 0.13"
 }
 
+
 # Провайдер
 provider "yandex" {
   token     = var.yc_token
