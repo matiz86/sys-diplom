@@ -68,7 +68,7 @@ resource "yandex_compute_instance" "nginxvm2" {
     user-data = "${file("./meta.txt")}"
   }
 }
-# Создаем виртуальые машины лоя сервисов
+# Создаем виртуальые машины для сервисов
 
 resource "yandex_compute_instance" "zbxserver" {
   name = "zbxserver"
