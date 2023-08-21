@@ -12,9 +12,9 @@ resource "yandex_compute_instance" "nginxvm1" {
 
   boot_disk {
     initialize_params {
-      image_id    = "fd8o41nbel1uqngk0op2"
-      size        = 10
-      description = "boot disk for nginx_server1"
+      image_id = "fd8o41nbel1uqngk0op2"
+      size     = 10
+
     }
   }
   network_interface {
@@ -38,9 +38,9 @@ resource "yandex_compute_instance" "nginxvm2" {
 
   boot_disk {
     initialize_params {
-      image_id    = "fd8o41nbel1uqngk0op2"
-      size        = 10
-      description = "boot disk for nginx_server1"
+      image_id = "fd8o41nbel1uqngk0op2"
+      size     = 10
+
     }
   }
   network_interface {
@@ -111,6 +111,35 @@ resource "yandex_alb_virtual_host" "router-host" {
       http_route_action {
         backend_group_id = yandex_alb_backend_group.backend-group.id
         timeout          = "5s"
+      }
+    }
+  }
+}
+
+# Alb_load_balancer
+
+resource "yandex_alb_load_balancer" "alb" {
+  name       = "alb"
+  network_id = yandex_vpc_network.diplom.id
+
+  allocation_policy {
+    location {
+      zone_id   = "ru-central1-b"
+      subnet_id = yandex_vpc_subnet.subnet-3.id
+    }
+  }
+  listener {
+    name = "listener-1"
+    endpoint {
+      address {
+        external_ipv4_address {
+        }
+      }
+      ports = ["80"]
+    }
+    http {
+      handler {
+        http_router_id = yandex_alb_http_router.router.id
       }
     }
   }
