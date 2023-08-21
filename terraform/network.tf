@@ -15,3 +15,23 @@ resource "yandex_vpc_subnet" "subnet2" {
   network_id     = yandex_vpc_network.matiz-sys.id
   v4_cidr_blocks = ["10.0.2.0/24"]
 }
+
+#Создание группы безопасности
+
+resource "yandex_vpc_security_group" "webs" {
+  name        = "webs"
+  description = "description for my security group"
+  network_id  = yandex_vpc_network.diplom.id
+
+  ingress {
+    protocol       = "ANY"
+    v4_cidr_blocks = ["10.0.1.0/24", "10.0.2.0/24"]
+    port           = 80
+  }
+
+  egress {
+    protocol       = "ANY"
+    v4_cidr_blocks = ["10.0.1.0/24", "10.0.2.0/24"]
+    port           = 80
+  }
+}
