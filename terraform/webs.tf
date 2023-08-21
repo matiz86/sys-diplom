@@ -120,12 +120,12 @@ resource "yandex_alb_virtual_host" "router-host" {
 
 resource "yandex_alb_load_balancer" "alb" {
   name       = "alb"
-  network_id = yandex_vpc_network.diplom.id
+  network_id = yandex_vpc_network.matiz-sys.id
 
   allocation_policy {
     location {
       zone_id   = "ru-central1-b"
-      subnet_id = yandex_vpc_subnet.subnet-3.id
+      subnet_id = yandex_vpc_subnet.subnet4.id
     }
   }
   listener {
