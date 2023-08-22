@@ -145,3 +145,14 @@ resource "yandex_alb_load_balancer" "alb" {
   }
 }
 
+output "web1_private" {
+  value = yandex_compute_instance.nginxvm1.network_interface.0.ip_address
+}
+
+output "web2_private" {
+  value = yandex_compute_instance.nginxvm2.network_interface.0.ip_address
+}
+
+output "load_balancer_pub" {
+  value = yandex_alb_load_balancer.alb.listener[0].endpoint[0].address[0].external_ipv4_address
+}

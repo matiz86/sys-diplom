@@ -22,3 +22,7 @@ resource "yandex_compute_instance" "zbxserver" {
     user-data = "${file("./meta.txt")}"
   }
 }
+
+output "zbx" {
+  value = yandex_compute_instance.zbxserver.network_interface.0.ip_address
+}

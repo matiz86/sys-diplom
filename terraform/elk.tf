@@ -55,3 +55,15 @@ resource "yandex_compute_instance" "kibana" {
     user-data = "${file("./meta.txt")}"
   }
 }
+
+output "elastic" {
+  value = yandex_compute_instance.elasticsearch.network_interface.0.ip_address
+}
+
+output "kibana" {
+  value = yandex_compute_instance.kibana.network_interface.0.ip_address
+}
+
+output "kibana_pub" {
+  value = yandex_compute_instance.kibana.network_interface.0.nat_ip_address
+}  

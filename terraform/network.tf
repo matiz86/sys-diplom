@@ -77,3 +77,21 @@ resource "yandex_vpc_security_group" "kibana" {
     port           = 5601
   }
 }
+
+resource "yandex_vpc_security_group" "zbxserver" {
+  name        = "zbxserver"
+  description = "description for my security group"
+  network_id  = yandex_vpc_network.matiz-sys.id
+
+  ingress {
+    protocol       = "ANY"
+    v4_cidr_blocks = ["10.0.4.0/24"]
+    port           = 10051
+  }
+
+  egress {
+    protocol       = "ANY"
+    v4_cidr_blocks = ["10.0.4.0/24"]
+    port           = 10051
+  }
+}
