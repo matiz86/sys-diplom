@@ -59,3 +59,21 @@ resource "yandex_vpc_security_group" "webs" {
     port           = 80
   }
 }
+
+resource "yandex_vpc_security_group" "kibana" {
+  name        = "kibana"
+  description = "description for my security group"
+  network_id  = yandex_vpc_network.matiz-sys.id
+
+  ingress {
+    protocol       = "ANY"
+    v4_cidr_blocks = ["10.0.4.0/24"]
+    port           = 5601
+  }
+
+  egress {
+    protocol       = "ANY"
+    v4_cidr_blocks = ["10.0.4.0/24"]
+    port           = 5601
+  }
+}
