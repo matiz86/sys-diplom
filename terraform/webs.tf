@@ -1,38 +1,17 @@
 # Web-Серверы 
 
-resource "yandex_compute_instance" "nginxvm1" {
-  name = "nginxvm1"
-  zone = "ru-central1-a"
+resource "yandex_compute_instance" "web1" {
 
-  resources {
-    cores         = 2
-    core_fraction = 20
-    memory        = 2
-  }
-
-  boot_disk {
-    initialize_params {
-      image_id = "fd8o41nbel1uqngk0op2"
-      size     = 10
-
-    }
-  }
-  network_interface {
-    subnet_id = yandex_vpc_subnet.subnet1.id
-    nat       = true
-  }
-  metadata = {
-    user-data = "${file("./meta.txt")}"
-  }
-}
-
-resource "yandex_compute_instance" "nginxvm2" {
-  name = "nginxvm2"
+  name = "web1"
   zone = "ru-central1-b"
 
+  scheduling_policy {
+    preemptible = true
+  }
+
   resources {
-    cores         = 2
     core_fraction = 20
+    cores         = 2
     memory        = 2
   }
 
@@ -40,17 +19,57 @@ resource "yandex_compute_instance" "nginxvm2" {
     initialize_params {
       image_id = "fd8o41nbel1uqngk0op2"
       size     = 10
-
     }
   }
+
   network_interface {
-    subnet_id = yandex_vpc_subnet.subnet2.id
+    subnet_id = yandex_vpc_subnet.subnet-1.id
     nat       = true
+
   }
+
   metadata = {
+
     user-data = "${file("./meta.txt")}"
   }
 }
+
+resource "yandex_compute_instance" "web2" {
+
+  name = "web2"
+  zone = "ru-central1-a"
+
+
+  scheduling_policy {
+    preemptible = true
+  }
+
+  resources {
+    core_fraction = 20
+    cores         = 2
+    memory        = 2
+  }
+
+  boot_disk {
+    initialize_params {
+      image_id = "fd8o41nbel1uqngk0op2"
+      size     = 10
+    }
+  }
+
+  network_interface {
+    subnet_id = yandex_vpc_subnet.subnet-2.id
+
+    nat = true
+
+  }
+
+  metadata = {
+
+    user-data = "${file("./meta.txt")}"
+  }
+}
+
 
 # Target Groups
 
@@ -58,13 +77,13 @@ resource "yandex_alb_target_group" "tg-group" {
   name = "tg-group"
 
   target {
-    subnet_id  = yandex_vpc_subnet.subnet1.id
-    ip_address = yandex_compute_instance.nginxvm1.network_interface.0.ip_address
+    subnet_id  = yandex_vpc_subnet.subnet-1.id
+    ip_address = yandex_compute_instance.web1.network_interface.0.ip_address
   }
 
   target {
-    subnet_id  = yandex_vpc_subnet.subnet2.id
-    ip_address = yandex_compute_instance.nginxvm2.network_interface.0.ip_address
+    subnet_id  = yandex_vpc_subnet.subnet-2.id
+    ip_address = yandex_compute_instance.web2.network_interface.0.ip_address
   }
 
 }
@@ -116,26 +135,44 @@ resource "yandex_alb_virtual_host" "router-host" {
   }
 }
 
+# Alb address
+
+resource "yandex_vpc_address" "addr" {
+  name = "addr"
+
+  external_ipv4_address {
+    zone_id = "ru-central1-a"
+  }
+}
+
 # Alb_load_balancer
 
 resource "yandex_alb_load_balancer" "alb" {
   name       = "alb"
-  network_id = yandex_vpc_network.matiz-sys.id
+  network_id = yandex_vpc_network.diplom.id
+  # security_group_ids = [yandex_vpc_security_group.sg-balancer.id]
 
   allocation_policy {
     location {
+      zone_id   = "ru-central1-a"
+      subnet_id = yandex_vpc_subnet.subnet-2.id
+    }
+
+    location {
       zone_id   = "ru-central1-b"
-      subnet_id = yandex_vpc_subnet.subnet4.id
+      subnet_id = yandex_vpc_subnet.subnet-1.id
     }
   }
+
   listener {
     name = "listener-1"
     endpoint {
       address {
         external_ipv4_address {
+          address = yandex_vpc_address.addr.external_ipv4_address[0].address
         }
       }
-      ports = ["80"]
+      ports = [80]
     }
     http {
       handler {
@@ -145,14 +182,14 @@ resource "yandex_alb_load_balancer" "alb" {
   }
 }
 
-output "web1_private" {
-  value = yandex_compute_instance.nginxvm1.network_interface.0.ip_address
-}
+# output "web1_private" {
+#   value = yandex_compute_instance.nginxvm1.network_interface.0.ip_address
+# }
 
-output "web2_private" {
-  value = yandex_compute_instance.nginxvm2.network_interface.0.ip_address
-}
+# output "web2_private" {
+#   value = yandex_compute_instance.nginxvm2.network_interface.0.ip_address
+# }
 
-output "load_balancer_pub" {
-  value = yandex_alb_load_balancer.alb.listener[0].endpoint[0].address[0].external_ipv4_address
-}
+# output "load_balancer_pub" {
+#   value = yandex_alb_load_balancer.alb.listener[0].endpoint[0].address[0].external_ipv4_address
+# }

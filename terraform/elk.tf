@@ -1,69 +1,71 @@
-# ELK 
+# # ELK 
 
-resource "yandex_compute_instance" "elasticsearch" {
+# resource "yandex_compute_instance" "elasticsearch" {
 
-  zone = "ru-central1-b"
-  name = "elasticsearch"
+#   zone = "ru-central1-b"
+#   name = "elasticsearch"
 
-  resources {
-    core_fraction = 20
-    cores         = 2
-    memory        = 6
-  }
+#   resources {
+#     core_fraction = 20
+#     cores         = 2
+#     memory        = 6
+#   }
 
-  boot_disk {
-    initialize_params {
-      image_id = "fd8o41nbel1uqngk0op2"
-      size     = 15
-    }
-  }
+#   boot_disk {
+#     initialize_params {
+#       image_id = "fd8o41nbel1uqngk0op2"
+#       size     = 15
+#     }
+#   }
 
-  network_interface {
-    subnet_id = yandex_vpc_subnet.subnet3.id
-    nat       = true
-  }
+#   network_interface {
+#     subnet_id          = yandex_vpc_subnet.subnet3.id
+#     nat                = true
+#     security_group_ids = [yandex_vpc_security_group.sg-private.id]
+#   }
 
-  metadata = {
-    user-data = "${file("./meta.txt")}"
-  }
-}
+#   metadata = {
+#     user-data = "${file("./meta.txt")}"
+#   }
+# }
 
-resource "yandex_compute_instance" "kibana" {
+# resource "yandex_compute_instance" "kibana" {
 
-  zone = "ru-central1-b"
-  name = "kibana"
+#   zone = "ru-central1-b"
+#   name = "kibana"
 
-  resources {
-    core_fraction = 20
-    cores         = 2
-    memory        = 4
-  }
+#   resources {
+#     core_fraction = 20
+#     cores         = 2
+#     memory        = 4
+#   }
 
-  boot_disk {
-    initialize_params {
-      image_id = "fd8o41nbel1uqngk0op2"
-      size     = 10
-    }
-  }
+#   boot_disk {
+#     initialize_params {
+#       image_id = "fd8o41nbel1uqngk0op2"
+#       size     = 10
+#     }
+#   }
 
-  network_interface {
-    subnet_id = yandex_vpc_subnet.subnet4.id
-    nat       = true
-  }
+#   network_interface {
+#     subnet_id          = yandex_vpc_subnet.subnet4.id
+#     nat                = true
+#     security_group_ids = [yandex_vpc_security_group.sg-public.id]
+#   }
 
-  metadata = {
-    user-data = "${file("./meta.txt")}"
-  }
-}
 
-output "elastic" {
-  value = yandex_compute_instance.elasticsearch.network_interface.0.ip_address
-}
+#   metadata = {
+#     user-data = "${file("./meta.txt")}"
+#   }
+# }
 
-output "kibana" {
-  value = yandex_compute_instance.kibana.network_interface.0.ip_address
-}
+# output "internal-elastic" {
+#   value = yandex_compute_instance.elasticsearch.network_interface.0.ip_address
+# }
 
-output "kibana_pub" {
-  value = yandex_compute_instance.kibana.network_interface.0.nat_ip_address
-}  
+# output "internal-kibana" {
+#   value = yandex_compute_instance.kibana.network_interface.0.ip_address
+# }
+# output "external-kibana" {
+#   value = yandex_compute_instance.kibana.network_interface.0.nat_ip_address
+# }
