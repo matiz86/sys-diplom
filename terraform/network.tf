@@ -152,12 +152,12 @@ resource "yandex_alb_load_balancer" "alb" {
   allocation_policy {
     location {
       zone_id   = "ru-central1-a"
-      subnet_id = yandex_vpc_subnet.subnet-web1.id
+      subnet_id = yandex_vpc_subnet.subnet-1.id
     }
 
     location {
       zone_id   = "ru-central1-b"
-      subnet_id = yandex_vpc_subnet.subnet-web2.id
+      subnet_id = yandex_vpc_subnet.subnet-2.id
     }
   }
 
@@ -216,5 +216,5 @@ output "external-ssh" {
 #}
 
 output "external-alb" {
-  value = yandex_vpc_address.addr.external_ipv4_address[0].address
+  value = yandex_vpc_address.addr-1.external_ipv4_address[0].address
 }
