@@ -1,9 +1,10 @@
-# Web-Серверы 
+# Web Server 1
 
 resource "yandex_compute_instance" "web1" {
 
-  name = "web1"
-  zone = "ru-central1-b"
+  name     = "web1"
+  zone     = "ru-central1-a"
+  hostname = "web1.srv."
 
   scheduling_policy {
     preemptible = true
@@ -18,14 +19,18 @@ resource "yandex_compute_instance" "web1" {
   boot_disk {
     initialize_params {
       image_id = "fd8o41nbel1uqngk0op2"
-      size     = 10
+      size     = 12
     }
   }
 
   network_interface {
     subnet_id = yandex_vpc_subnet.subnet-1.id
-    nat       = true
-
+    dns_record {
+      fqdn = "web1.srv."
+      ttl  = 300
+    }
+    nat                = true
+    security_group_ids = [yandex_vpc_security_group.security_group-private.id]
   }
 
   metadata = {
@@ -34,11 +39,13 @@ resource "yandex_compute_instance" "web1" {
   }
 }
 
+# Web Server 2
+
 resource "yandex_compute_instance" "web2" {
 
-  name = "web2"
-  zone = "ru-central1-a"
-
+  name     = "web2"
+  zone     = "ru-central1-b"
+  hostname = "web2.srv."
 
   scheduling_policy {
     preemptible = true
@@ -53,15 +60,18 @@ resource "yandex_compute_instance" "web2" {
   boot_disk {
     initialize_params {
       image_id = "fd8o41nbel1uqngk0op2"
-      size     = 10
+      size     = 12
     }
   }
 
   network_interface {
     subnet_id = yandex_vpc_subnet.subnet-2.id
-
-    nat = true
-
+    dns_record {
+      fqdn = "web2.srv."
+      ttl  = 300
+    }
+    nat                = true
+    security_group_ids = [yandex_vpc_security_group.security_group-private.id]
   }
 
   metadata = {
@@ -70,126 +80,167 @@ resource "yandex_compute_instance" "web2" {
   }
 }
 
+# Zabbix Server
 
-# Target Groups
+resource "yandex_compute_instance" "zabbix" {
 
-resource "yandex_alb_target_group" "tg-group" {
-  name = "tg-group"
+  name     = "zabbix"
+  zone     = "ru-central1-b"
+  hostname = "prometheus.srv."
 
-  target {
-    subnet_id  = yandex_vpc_subnet.subnet-1.id
-    ip_address = yandex_compute_instance.web1.network_interface.0.ip_address
+  scheduling_policy {
+    preemptible = true
   }
 
-  target {
-    subnet_id  = yandex_vpc_subnet.subnet-2.id
-    ip_address = yandex_compute_instance.web2.network_interface.0.ip_address
+  resources {
+    core_fraction = 20
+    cores         = 2
+    memory        = 4
   }
 
-}
-
-# Backend_group
-
-resource "yandex_alb_backend_group" "backend-group" {
-  name = "backend-group"
-
-  http_backend {
-    name             = "backend"
-    weight           = 1
-    port             = 80
-    target_group_ids = [yandex_alb_target_group.tg-group.id]
-    load_balancing_config {
-      panic_threshold = 90
+  boot_disk {
+    initialize_params {
+      image_id = "fd8o41nbel1uqngk0op2"
+      size     = 12
     }
-    healthcheck {
-      timeout             = "5s"
-      interval            = "3s"
-      healthy_threshold   = 10
-      unhealthy_threshold = 15
-      http_healthcheck {
-        path = "/"
-      }
+  }
+
+  network_interface {
+    subnet_id = yandex_vpc_subnet.subnet3-zabbix.id
+    dns_record {
+      fqdn = "zabbix.srv."
+      ttl  = 300
     }
+    nat                = true
+    security_group_ids = [yandex_vpc_security_group.security_group-private.id]
+  }
+
+  metadata = {
+
+    user-data = "${file("./meta.txt")}"
   }
 }
 
-# Http-router 
+# ElasticSearch Server
 
-resource "yandex_alb_http_router" "router" {
-  name = "router"
+resource "yandex_compute_instance" "elasticsearch" {
 
-}
+  name     = "elasticsearch"
+  zone     = "ru-central1-a"
+  hostname = "elasticsearch.srv."
 
-resource "yandex_alb_virtual_host" "router-host" {
-  name           = "router-host"
-  http_router_id = yandex_alb_http_router.router.id
-  route {
-    name = "router1"
-    http_route {
-
-      http_route_action {
-        backend_group_id = yandex_alb_backend_group.backend-group.id
-        timeout          = "5s"
-      }
-    }
+  scheduling_policy {
+    preemptible = true
   }
-}
 
-# Alb address
-
-resource "yandex_vpc_address" "addr" {
-  name = "addr"
-
-  external_ipv4_address {
-    zone_id = "ru-central1-a"
+  resources {
+    core_fraction = 20
+    cores         = 2
+    memory        = 8
   }
-}
 
-# Alb_load_balancer
-
-resource "yandex_alb_load_balancer" "alb" {
-  name       = "alb"
-  network_id = yandex_vpc_network.diplom.id
-  # security_group_ids = [yandex_vpc_security_group.sg-balancer.id]
-
-  allocation_policy {
-    location {
-      zone_id   = "ru-central1-a"
-      subnet_id = yandex_vpc_subnet.subnet-2.id
-    }
-
-    location {
-      zone_id   = "ru-central1-b"
-      subnet_id = yandex_vpc_subnet.subnet-1.id
+  boot_disk {
+    initialize_params {
+      image_id = "fd8o41nbel1uqngk0op2"
+      size     = 14
     }
   }
 
-  listener {
-    name = "listener-1"
-    endpoint {
-      address {
-        external_ipv4_address {
-          address = yandex_vpc_address.addr.external_ipv4_address[0].address
-        }
-      }
-      ports = [80]
+  network_interface {
+    subnet_id = yandex_vpc_subnet.subnet4-elastic.id
+    dns_record {
+      fqdn = "elastic.srv."
+      ttl  = 300
     }
-    http {
-      handler {
-        http_router_id = yandex_alb_http_router.router.id
-      }
-    }
+    nat                = true
+    security_group_ids = [yandex_vpc_security_group.security_group-private.id]
+  }
+
+  metadata = {
+
+    user-data = "${file("./meta.txt")}"
   }
 }
 
-# output "web1_private" {
-#   value = yandex_compute_instance.nginxvm1.network_interface.0.ip_address
-# }
+# Kibana server
 
-# output "web2_private" {
-#   value = yandex_compute_instance.nginxvm2.network_interface.0.ip_address
-# }
+resource "yandex_compute_instance" "kibana" {
 
-# output "load_balancer_pub" {
-#   value = yandex_alb_load_balancer.alb.listener[0].endpoint[0].address[0].external_ipv4_address
-# }
+  name     = "kibana"
+  zone     = "ru-central1-a"
+  hostname = "kibana.srv."
+
+  scheduling_policy {
+    preemptible = true
+  }
+
+  resources {
+    core_fraction = 20
+    cores         = 2
+    memory        = 8
+  }
+
+  boot_disk {
+    initialize_params {
+      image_id = "fd8o41nbel1uqngk0op2"
+      size     = 14
+    }
+  }
+
+
+  network_interface {
+    subnet_id = yandex_vpc_subnet.subnet5-kibana.id
+    dns_record {
+      fqdn = "kibana.srv."
+      ttl  = 300
+    }
+    nat                = true
+    security_group_ids = [yandex_vpc_security_group.security_group-public.id]
+  }
+
+  metadata = {
+
+    user-data = "${file("./meta.txt")}"
+  }
+}
+
+# Ssh Server
+
+resource "yandex_compute_instance" "ssh" {
+
+  name     = "ssh"
+  zone     = "ru-central1-a"
+  hostname = "ssh.srv."
+
+  scheduling_policy {
+    preemptible = true
+  }
+
+  resources {
+    core_fraction = 20
+    cores         = 2
+    memory        = 2
+  }
+
+  boot_disk {
+    initialize_params {
+      image_id = "fd8o41nbel1uqngk0op2"
+      size     = 12
+    }
+  }
+
+  network_interface {
+    subnet_id = yandex_vpc_subnet.subnet6-ssh.id
+    dns_record {
+      fqdn = "ssgw.srv."
+      ttl  = 300
+    }
+    nat                = true
+    security_group_ids = [yandex_vpc_security_group.sg-ssh.id]
+  }
+
+  metadata = {
+
+    user-data = "${file("./meta.txt")}"
+  }
+}
