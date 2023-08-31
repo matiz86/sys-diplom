@@ -1,6 +1,7 @@
-resource "yandex_compute_instance" "zbxserver" {
-  name = "zbxserver"
-  zone = "ru-central1-b"
+resource "yandex_compute_instance" "zabbix" {
+
+  name = "zabbix"
+  zone = "ru-central1-a"
   resources {
     cores         = 2
     core_fraction = 20
@@ -9,7 +10,7 @@ resource "yandex_compute_instance" "zbxserver" {
 
   boot_disk {
     initialize_params {
-      image_id    = "fd8o41nbel1uqngk0op2"
+      image_id    = "fd8gqjo661d83tv5dnv4"
       size        = 30
       description = "boot disk for zbxserver"
     }
@@ -23,6 +24,6 @@ resource "yandex_compute_instance" "zbxserver" {
   }
 }
 
-output "zbx" {
-  value = yandex_compute_instance.zbxserver.network_interface.0.ip_address
+output "zbxserver" {
+  value = yandex_compute_instance.zabbix.network_interface.0.ip_address
 }

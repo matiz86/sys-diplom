@@ -8,12 +8,12 @@
 #   resources {
 #     core_fraction = 20
 #     cores         = 2
-#     memory        = 6
+#     memory        = 8
 #   }
 
 #   boot_disk {
 #     initialize_params {
-#       image_id = "fd8o41nbel1uqngk0op2"
+#       image_id = "fd8gqjo661d83tv5dnv4"
 #       size     = 15
 #     }
 #   }
@@ -42,7 +42,7 @@
 
 #   boot_disk {
 #     initialize_params {
-#       image_id = "fd8o41nbel1uqngk0op2"
+#       image_id = "fd8gqjo661d83tv5dnv4"
 #       size     = 10
 #     }
 #   }
