@@ -1,117 +1,108 @@
-# Network
+
+
+# Сеть 
 
 resource "yandex_vpc_network" "diplom" {
-
   name = "diplom"
-}
 
-# Subnet web1
-
-resource "yandex_vpc_subnet" "subnet-1" {
-
-  name           = "subnet-web1"
-  zone           = "ru-central1-a"
-  v4_cidr_blocks = ["10.0.1.0/24"]
-  network_id     = yandex_vpc_network.diplom.id
-}
-
-# Subnet web2
-
-resource "yandex_vpc_subnet" "subnet-2" {
-
-  name           = "subnet-web2"
-  zone           = "ru-central1-b"
-  v4_cidr_blocks = ["10.0.2.0/24"]
-  network_id     = yandex_vpc_network.diplom.id
-}
-
-# Subnet Zabbix
-
-resource "yandex_vpc_subnet" "subnet3-zabbix" {
-
-  name           = "subnet-zabbix"
-  zone           = "ru-central1-b"
-  v4_cidr_blocks = ["10.0.3.0/24"]
-  network_id     = yandex_vpc_network.diplom.id
 }
 
 
-# Subnet elasticsearch
+# Настройка Nat-шлюза и статический маршрут через бастион для внутренней сети 
 
-resource "yandex_vpc_subnet" "subnet4-elastic" {
-
-  name           = "subnet-elastic"
-  zone           = "ru-central1-a"
-  v4_cidr_blocks = ["10.0.4.0/24"]
-  network_id     = yandex_vpc_network.diplom.id
+resource "yandex_vpc_gateway" "nat_gateway" {
+  name = "test-gateway"
+  shared_egress_gateway {}
 }
 
-# Subnet kibana
+resource "yandex_vpc_route_table" "route_table" {
+  network_id = yandex_vpc_network.diplom.id
 
-resource "yandex_vpc_subnet" "subnet5-kibana" {
-
-  name           = "subnet-kibana"
-  zone           = "ru-central1-a"
-  v4_cidr_blocks = ["10.0.5.0/24"]
-  network_id     = yandex_vpc_network.diplom.id
-}
-
-# Subnet ssh
-
-resource "yandex_vpc_subnet" "subnet6-ssh" {
-
-  name           = "subnet-ssh"
-  zone           = "ru-central1-a"
-  v4_cidr_blocks = ["10.0.6.0/24"]
-  network_id     = yandex_vpc_network.diplom.id
-}
-
-
-# alb address
-
-resource "yandex_vpc_address" "addr-1" {
-  name = "addr-1"
-
-  external_ipv4_address {
-    zone_id = "ru-central1-b"
+  static_route {
+    destination_prefix = "0.0.0.0/0"
+    gateway_id         = yandex_vpc_gateway.nat_gateway.id
   }
 }
 
-# Target group for ALB
 
-resource "yandex_alb_target_group" "target_group" {
-  name = "target_group"
+# Private subnet for web-1 
+
+resource "yandex_vpc_subnet" "private-subnet-1" {
+  name = "private-subnet-1"
+
+  v4_cidr_blocks = ["10.1.0.0/16"]
+  zone           = "ru-central1-a"
+  network_id     = yandex_vpc_network.diplom.id
+  route_table_id = yandex_vpc_route_table.route_table.id
+
+}
+
+# Private subnet for web-2
+
+resource "yandex_vpc_subnet" "private-subnet-2" {
+  name = "private-subnet-2"
+
+  v4_cidr_blocks = ["10.2.0.0/16"]
+  zone           = "ru-central1-b"
+  network_id     = yandex_vpc_network.diplom.id
+  route_table_id = yandex_vpc_route_table.route_table.id
+}
+
+# Private subnet for services
+
+resource "yandex_vpc_subnet" "private-subnet-3" {
+  name = "private-subnet-3"
+
+  v4_cidr_blocks = ["10.3.0.0/16"]
+  zone           = "ru-central1-c"
+  network_id     = yandex_vpc_network.diplom.id
+  route_table_id = yandex_vpc_route_table.route_table.id
+}
+
+#  Public subnet for bastion
+
+resource "yandex_vpc_subnet" "public-subnet" {
+  name = "public-subnet"
+
+  v4_cidr_blocks = ["10.4.0.0/16"]
+  zone           = "ru-central1-c"
+  network_id     = yandex_vpc_network.diplom.id
+}
+
+#  Target Group 
+
+resource "yandex_alb_target_group" "tg-group" {
+  name = "tg-group"
 
   target {
-    subnet_id  = yandex_compute_instance.web1.network_interface.0.subnet_id
-    ip_address = yandex_compute_instance.web1.network_interface.0.ip_address
+    ip_address = yandex_compute_instance.web-1.network_interface.0.ip_address
+    subnet_id  = yandex_vpc_subnet.private-subnet-1.id
   }
 
   target {
-    subnet_id  = yandex_compute_instance.web2.network_interface.0.subnet_id
-    ip_address = yandex_compute_instance.web2.network_interface.0.ip_address
+    ip_address = yandex_compute_instance.web-2.network_interface.0.ip_address
+    subnet_id  = yandex_vpc_subnet.private-subnet-2.id
   }
 }
 
-# Backend group for ALB
+#    Backend Group    
 
-resource "yandex_alb_backend_group" "backend_group" {
-  name = "backend_group"
+resource "yandex_alb_backend_group" "backend-group" {
+  name = "backend-group"
 
   http_backend {
     name             = "backend"
     weight           = 1
     port             = 80
-    target_group_ids = ["${yandex_alb_target_group.target_group.id}"]
-
+    target_group_ids = [yandex_alb_target_group.tg-group.id]
     load_balancing_config {
-      panic_threshold = 9
+      panic_threshold = 90
     }
     healthcheck {
-      timeout             = "5s"
+      timeout             = "10s"
       interval            = "2s"
-      healthy_threshold   = 2
-      unhealthy_threshold = 10
+      healthy_threshold   = 10
+      unhealthy_threshold = 15
       http_healthcheck {
         path = "/"
       }
@@ -119,54 +110,46 @@ resource "yandex_alb_backend_group" "backend_group" {
   }
 }
 
-# ALB router
-
 resource "yandex_alb_http_router" "router" {
   name = "router"
 }
 
-# ALB virtual host
-
-resource "yandex_alb_virtual_host" "vh-1" {
-  name           = "vh-1"
+resource "yandex_alb_virtual_host" "router-host" {
+  name           = "router-host"
   http_router_id = yandex_alb_http_router.router.id
-
   route {
     name = "route"
     http_route {
+      http_match {
+        path {
+          prefix = "/"
+        }
+      }
       http_route_action {
-        backend_group_id = yandex_alb_backend_group.backend_group.id
+        backend_group_id = yandex_alb_backend_group.backend-group.id
         timeout          = "3s"
       }
     }
   }
 }
 
-# ALB
-
-resource "yandex_alb_load_balancer" "alb" {
-  name               = "alb"
+resource "yandex_alb_load_balancer" "load-balancer" {
+  name               = "load-balancer"
   network_id         = yandex_vpc_network.diplom.id
-  security_group_ids = [yandex_vpc_security_group.sg-balancer.id]
+  security_group_ids = [yandex_vpc_security_group.load-balancer-sg.id, yandex_vpc_security_group.private-sg.id]
 
   allocation_policy {
     location {
-      zone_id   = "ru-central1-a"
-      subnet_id = yandex_vpc_subnet.subnet-1.id
-    }
-
-    location {
-      zone_id   = "ru-central1-b"
-      subnet_id = yandex_vpc_subnet.subnet-2.id
+      zone_id   = "ru-central1-c"
+      subnet_id = yandex_vpc_subnet.private-subnet-3.id
     }
   }
 
   listener {
-    name = "listener"
+    name = "listener-1"
     endpoint {
       address {
         external_ipv4_address {
-          address = yandex_vpc_address.addr-1.external_ipv4_address[0].address
         }
       }
       ports = [80]
@@ -179,42 +162,130 @@ resource "yandex_alb_load_balancer" "alb" {
   }
 }
 
-# Output
+#   Security Groups  
 
-output "internal-web1" {
-  value = yandex_compute_instance.web1.network_interface.0.ip_address
+resource "yandex_vpc_security_group" "private-sg" {
+  name       = "private-sg"
+  network_id = yandex_vpc_network.diplom.id
+
+  ingress {
+    protocol = "TCP"
+
+    predefined_target = "loadbalancer_healthchecks"
+    from_port         = 0
+    to_port           = 65535
+  }
+
+  ingress {
+    protocol       = "ANY"
+    v4_cidr_blocks = ["10.1.0.0/16", "10.2.0.0/16", "10.3.0.0/16", "10.4.0.0/16"]
+  }
+
+  egress {
+    protocol       = "ANY"
+    v4_cidr_blocks = ["0.0.0.0/0"]
+  }
 }
 
-output "internal-web2" {
-  value = yandex_compute_instance.web2.network_interface.0.ip_address
+
+resource "yandex_vpc_security_group" "load-balancer-sg" {
+  name       = "load-balancer-sg"
+  network_id = yandex_vpc_network.diplom.id
+
+  ingress {
+    protocol          = "ANY"
+    v4_cidr_blocks    = ["0.0.0.0/0"]
+    predefined_target = "loadbalancer_healthchecks"
+  }
+
+  ingress {
+    protocol       = "TCP"
+    v4_cidr_blocks = ["0.0.0.0/0"]
+    port           = 80
+  }
+
+  ingress {
+    protocol       = "ICMP"
+    v4_cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    protocol       = "ANY"
+    v4_cidr_blocks = ["0.0.0.0/0"]
+  }
 }
 
-output "internal-zabbix" {
-  value = yandex_compute_instance.zabbix.network_interface.0.ip_address
+resource "yandex_vpc_security_group" "bastion-sg" {
+  name       = "bastion-sg"
+  network_id = yandex_vpc_network.diplom.id
+
+  ingress {
+    protocol       = "TCP"
+    v4_cidr_blocks = ["0.0.0.0/0"]
+    port           = 22
+  }
+
+  ingress {
+    protocol       = "ICMP"
+    v4_cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    protocol       = "ANY"
+    v4_cidr_blocks = ["0.0.0.0/0"]
+  }
 }
 
-output "internal-elastic" {
-  value = yandex_compute_instance.elasticsearch.network_interface.0.ip_address
+
+
+resource "yandex_vpc_security_group" "kibana-sg" {
+  name       = "kibana-sg"
+  network_id = yandex_vpc_network.diplom.id
+
+  ingress {
+    protocol       = "TCP"
+    v4_cidr_blocks = ["0.0.0.0/0"]
+    port           = 5601
+  }
+
+  ingress {
+    protocol       = "ICMP"
+    v4_cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    protocol       = "ANY"
+    v4_cidr_blocks = ["0.0.0.0/0"]
+  }
 }
 
-output "internal-kibana" {
-  value = yandex_compute_instance.kibana.network_interface.0.ip_address
-}
-output "external-kibana" {
-  value = yandex_compute_instance.kibana.network_interface.0.nat_ip_address
-}
+resource "yandex_vpc_security_group" "elasticsearch-sg" {
+  name        = "elasticsearch-sg"
+  description = "Elasticsearch security group"
+  network_id  = yandex_vpc_network.diplom.id
 
-output "internal-ssh" {
-  value = yandex_compute_instance.ssh.network_interface.0.ip_address
-}
-output "external-ssh" {
-  value = yandex_compute_instance.ssh.network_interface.0.nat_ip_address
-}
+  ingress {
+    protocol          = "TCP"
+    security_group_id = yandex_vpc_security_group.kibana-sg.id
+    port              = 9200
+  }
 
-#output "external-alb" {
-#  value = yandex_alb_load_balancer.alb.listener[0].endpoint[0].address[0].external_ipv4_address[0].address
-#}
+  ingress {
+    protocol          = "TCP"
+    description       = "Rule for web"
+    security_group_id = yandex_vpc_security_group.private-sg.id
+    port              = 9200
+  }
 
-output "external-alb" {
-  value = yandex_vpc_address.addr-1.external_ipv4_address[0].address
+  ingress {
+    protocol          = "TCP"
+    description       = "Rule for bastion ssh"
+    security_group_id = yandex_vpc_security_group.bastion-sg.id
+    port              = 22
+  }
+
+  egress {
+    protocol       = "ANY"
+    v4_cidr_blocks = ["0.0.0.0/0"]
+  }
 }
