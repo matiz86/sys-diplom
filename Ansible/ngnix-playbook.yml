@@ -12,7 +12,7 @@
       become: true
 
     - name: Install nginx on all servers
-      apt: name=nginx state=latest update_cache=yes
+      apt: name=nginx state=latest  update_cache=yes
 
     - name: copy index_new.html
       ansible.builtin.copy:
