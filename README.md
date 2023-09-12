@@ -38,7 +38,7 @@
 
 Создал инфраструктуру из 6 ВМ.Согласно заданию. web-1 и web-2 помещены в разные зоны.
  
-![Virtual Machine](https://github.com/matiz86/sys-diplom/blob/image/main/VM.png)
+![Virtual Machine](https://github.com/matiz86/sys-diplom/blob/main/image/VM.png)
 
 Установлен Nginx
 
