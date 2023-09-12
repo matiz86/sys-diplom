@@ -29,8 +29,8 @@
 
 Вся инфраструктура и конфигурации создавались при помощи Terraform и Ansibsle.Все файлы лежат в соответсвтующих папка,в репозитории на github.
 
-https://github.com/matiz86/sys-diplom/tree/main/terraform
-https://github.com/matiz86/sys-diplom/tree/main/Ansible 
+[terraform](https://github.com/matiz86/sys-diplom/tree/main/terraform)
+[ansible](https://github.com/matiz86/sys-diplom/tree/main/Ansible) 
 
 ### Сайт
 Создайте две ВМ в разных зонах, установите на них сервер nginx, если его там нет. ОС и содержимое ВМ должно быть идентичным, это будут наши веб-сервера.
@@ -45,19 +45,29 @@ https://github.com/matiz86/sys-diplom/tree/main/Ansible
 ![web1](https://github.com/matiz86/sys-diplom/blob/main/web1.png)
 
 ![web2](https://github.com/matiz86/sys-diplom/blob/main/web2.png)
-
+*****************************************************************************************************************
 Используйте набор статичных файлов для сайта. Можно переиспользовать сайт из домашнего задания.
 
 Создайте [Target Group](https://cloud.yandex.com/docs/application-load-balancer/concepts/target-group), включите в неё две созданных ВМ.
 
+![web1](https://github.com/matiz86/sys-diplom/blob/main/tg.png)
+
 Создайте [Backend Group](https://cloud.yandex.com/docs/application-load-balancer/concepts/backend-group), настройте backends на target group, ранее созданную. Настройте healthcheck на корень (/) и порт 80, протокол HTTP.
+
+![web1](https://github.com/matiz86/sys-diplom/blob/main/back.png)
 
 Создайте [HTTP router](https://cloud.yandex.com/docs/application-load-balancer/concepts/http-router). Путь укажите — /, backend group — созданную ранее.
 
+![web1](https://github.com/matiz86/sys-diplom/blob/main/router.png)
+
 Создайте [Application load balancer](https://cloud.yandex.com/en/docs/application-load-balancer/) для распределения трафика на веб-сервера, созданные ранее. Укажите HTTP router, созданный ранее, задайте listener тип auto, порт 80.
 
+![web1](https://github.com/matiz86/sys-diplom/blob/main/alb1.png)
+
 Протестируйте сайт
-`curl -v <публичный IP балансера>:80` 
+`curl -v 158.160.113.237:80` - сайт открывается с публичного IP балансира
+
+![web1](https://github.com/matiz86/sys-diplom/blob/main/alb.png) 
 
 ### Мониторинг
 Создайте ВМ, разверните на ней Zabbix. На каждую ВМ установите Zabbix Agent, настройте агенты на отправление метрик в Zabbix. 
