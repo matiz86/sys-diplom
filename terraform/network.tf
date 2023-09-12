@@ -69,6 +69,7 @@ resource "yandex_vpc_subnet" "public-subnet" {
   network_id     = yandex_vpc_network.diplom.id
 }
 
+
 #  Target Group 
 
 resource "yandex_alb_target_group" "tg-group" {
@@ -258,6 +259,28 @@ resource "yandex_vpc_security_group" "kibana-sg" {
     v4_cidr_blocks = ["0.0.0.0/0"]
   }
 }
+
+resource "yandex_vpc_security_group" "zabbix-sg" {
+  name       = "zabbix-sg"
+  network_id = yandex_vpc_network.diplom.id
+
+  ingress {
+    protocol       = "TCP"
+    v4_cidr_blocks = ["0.0.0.0/0"]
+    port           = 8080
+  }
+
+  ingress {
+    protocol       = "ICMP"
+    v4_cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    protocol       = "ANY"
+    v4_cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 
 resource "yandex_vpc_security_group" "elasticsearch-sg" {
   name        = "elasticsearch-sg"

@@ -86,17 +86,22 @@ resource "yandex_compute_instance" "zabbix" {
   }
 
   network_interface {
-    subnet_id          = yandex_vpc_subnet.private-subnet-3.id
-    security_group_ids = [yandex_vpc_security_group.private-sg.id]
-    ip_address         = "10.3.0.10"
+    subnet_id          = yandex_vpc_subnet.public-subnet.id
+    security_group_ids = [yandex_vpc_security_group.private-sg.id, yandex_vpc_security_group.zabbix-sg.id]
+    ip_address         = "10.4.0.20"
+    nat                = true
+
   }
 
   metadata = {
     user-data = "${file("./meta.txt")}"
   }
 
-
+  scheduling_policy {
+    preemptible = true
+  }
 }
+
 
 resource "yandex_compute_instance" "elasticsearch" {
   name     = "elasticsearch"
@@ -128,6 +133,7 @@ resource "yandex_compute_instance" "elasticsearch" {
 
 
 }
+
 
 
 resource "yandex_compute_instance" "kibana" {
@@ -165,6 +171,4 @@ resource "yandex_compute_instance" "kibana" {
   }
 
 }
-
-
 
