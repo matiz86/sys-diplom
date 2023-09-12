@@ -38,7 +38,7 @@ https://github.com/matiz86/sys-diplom/tree/main/terraform
 
 https://github.com/matiz86/sys-diplom/tree/main/Ansible
  
-![alt text](https://github.com/username/reponame/blob/branch/path/image.png)
+![Virtual Machine](https://github.com/matiz86/sys-diplom/blob/main/VM.png)
 
 Используйте набор статичных файлов для сайта. Можно переиспользовать сайт из домашнего задания.
 
