@@ -38,36 +38,36 @@
 
 Создал инфраструктуру из 6 ВМ.Согласно заданию. web-1 и web-2 помещены в разные зоны.
  
-![Virtual Machine](https://github.com/matiz86/sys-diplom/blob/main/VM.png)
+![Virtual Machine](https://github.com/matiz86/sys-diplom/blob/image/main/VM.png)
 
 Установлен Nginx
 
-![web1](https://github.com/matiz86/sys-diplom/blob/main/web1.png)
+![web1](https://github.com/matiz86/sys-diplom/blob/main/image/web1.png)
 
-![web2](https://github.com/matiz86/sys-diplom/blob/main/web2.png)
+![web2](https://github.com/matiz86/sys-diplom/blob/main/image/web2.png)
 *****************************************************************************************************************
 Используйте набор статичных файлов для сайта. Можно переиспользовать сайт из домашнего задания.
 
 Создайте [Target Group](https://cloud.yandex.com/docs/application-load-balancer/concepts/target-group), включите в неё две созданных ВМ.
 
-![web1](https://github.com/matiz86/sys-diplom/blob/main/tg.png)
+![web1](https://github.com/matiz86/sys-diplom/blob/main/image/tg.png)
 
 Создайте [Backend Group](https://cloud.yandex.com/docs/application-load-balancer/concepts/backend-group), настройте backends на target group, ранее созданную. Настройте healthcheck на корень (/) и порт 80, протокол HTTP.
 
-![web1](https://github.com/matiz86/sys-diplom/blob/main/back.png)
+![web1](https://github.com/matiz86/sys-diplom/blob/main/image/back.png)
 
 Создайте [HTTP router](https://cloud.yandex.com/docs/application-load-balancer/concepts/http-router). Путь укажите — /, backend group — созданную ранее.
 
-![web1](https://github.com/matiz86/sys-diplom/blob/main/router.png)
+![web1](https://github.com/matiz86/sys-diplom/blob/main/image/router.png)
 
 Создайте [Application load balancer](https://cloud.yandex.com/en/docs/application-load-balancer/) для распределения трафика на веб-сервера, созданные ранее. Укажите HTTP router, созданный ранее, задайте listener тип auto, порт 80.
 
-![web1](https://github.com/matiz86/sys-diplom/blob/main/alb1.png)
+![web1](https://github.com/matiz86/sys-diplom/blob/main/image/alb1.png)
 
 Протестируйте сайт
 `curl -v 158.160.113.237:80` - сайт открывается с публичного IP балансира
 
-![web1](https://github.com/matiz86/sys-diplom/blob/main/alb.png) 
+![web1](https://github.com/matiz86/sys-diplom/blob/main/image/alb.png) 
 
 ### Мониторинг
 Создайте ВМ, разверните на ней Zabbix. На каждую ВМ установите Zabbix Agent, настройте агенты на отправление метрик в Zabbix. 
