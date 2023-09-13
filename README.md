@@ -36,7 +36,7 @@
 Создайте две ВМ в разных зонах, установите на них сервер nginx, если его там нет. ОС и содержимое ВМ должно быть идентичным, это будут наши веб-сервера.
 *************************************************************************************************************
 
-Создал инфраструктуру из 6 ВМ.Согласно заданию. web-1 и web-2 помещены в разные зоны.
+Создал инфраструктуру из 6 ВМ.Согласно заданию. web-1 и web-2 помещены в разные зоны.Сервера Web,Elasticsearh помещены в приватные подсети.Сервера Zabbix, Kibana, application load balancer помещены в публичную подсеть.        
  
 ![Virtual Machine](https://github.com/matiz86/sys-diplom/blob/main/image/VM.png)
 
@@ -79,6 +79,16 @@
 
 ### Логи
 Cоздайте ВМ, разверните на ней Elasticsearch. Установите filebeat в ВМ к веб-серверам, настройте на отправку access.log, error.log nginx в Elasticsearch.
+
+Создаю VM elasticsearch:
+
+![web1](https://github.com/matiz86/sys-diplom/blob/main/image/elk.png)
+
+На web1 и web2 установлены filebeat и настроены на отправку метрик.
+
+![web1](https://github.com/matiz86/sys-diplom/blob/main/image/filebeat1.png)
+
+![web1](https://github.com/matiz86/sys-diplom/blob/main/image/filebeat2.png)
 
 Создайте ВМ, разверните на ней Kibana, сконфигурируйте соединение с Elasticsearch.
 
