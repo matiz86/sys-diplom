@@ -84,13 +84,40 @@ Cоздайте ВМ, разверните на ней Elasticsearch. Устан
 
 ![web1](https://github.com/matiz86/sys-diplom/blob/main/image/elk.png)
 
-На web1 и web2 установлены filebeat и настроены на отправку метрик.
 
+
+На web1 и web2 установлены filebeat.Заходим поочередно на сервера и настраиваем конфиг файл на отправку логов.
+
+Так как одним из заданий была реализация концепции bastion host,то на сервера будем заходить через него.
+Пример доступа к web-1 и web-2
+
+ssh -i ~/.ssh/id_rsa -J user@51.250.43.12 user@10.1.0.10
+
+ssh -i ~/.ssh/id_rsa -J user@51.250.43.12 user@10.2.0.10 
+
+sudo nano /etc/filebeat/filebeat.yml вставляем ip elastic и публичный ip kibana.
+
+sudo nano /etc/filebeat/modules.d/nginx.yml.disabled (Заменить false на true в блоках error и access)
+ 
+sudo systemctl restart filebeat
+
+sudo filebeat modules enable nginx
+
+sudo filebeat setup
+
+sudo filebeat -e 
+
+******************************************************************************************************
 ![web1](https://github.com/matiz86/sys-diplom/blob/main/image/filebeat1.png)
 
 ![web1](https://github.com/matiz86/sys-diplom/blob/main/image/filebeat2.png)
 
 Создайте ВМ, разверните на ней Kibana, сконфигурируйте соединение с Elasticsearch.
+
+![web1](https://github.com/matiz86/sys-diplom/blob/main/image/kibana.png)
+
+![web1](https://github.com/matiz86/sys-diplom/blob/main/image/kibana1.png)
+
 
 ### Сеть
 Разверните один VPC. Сервера web, Elasticsearch поместите в приватные подсети. Сервера Zabbix, Kibana, application load balancer определите в публичную подсеть.
@@ -100,6 +127,7 @@ Cоздайте ВМ, разверните на ней Elasticsearch. Устан
 Настройте ВМ с публичным адресом, в которой будет открыт только один порт — ssh. Настройте все security groups на разрешение входящего ssh из этой security group. Эта вм будет реализовывать концепцию bastion host. Потом можно будет подключаться по ssh ко всем хостам через этот хост.
 
 ### Резервное копирование
+
 Создайте snapshot дисков всех ВМ. Ограничьте время жизни snaphot в неделю. Сами snaphot настройте на ежедневное копирование.
 
 ### Дополнительно
