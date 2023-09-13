@@ -65,7 +65,9 @@
 ![web1](https://github.com/matiz86/sys-diplom/blob/main/image/alb1.png)
 
 Протестируйте сайт
-`curl -v 158.160.113.237:80` - сайт открывается с публичного IP балансира
+`curl -v 158.160.113.237:80`
+
+##158.160.113.237:80 - сайт открывается с публичного IP балансира
 
 ![web1](https://github.com/matiz86/sys-diplom/blob/main/image/alb.png) 
 
@@ -104,7 +106,7 @@ sudo nano /etc/filebeat/filebeat.yml
 ```
 sudo nano /etc/filebeat/modules.d/nginx.yml.disabled
 ```
- (Заменить false на true в блоках error и access)
+ Заменить false на true в блоках error и access
 
 ```
 sudo systemctl restart filebeat
@@ -125,13 +127,25 @@ sudo filebeat -e
 
 Создайте ВМ, разверните на ней Kibana, сконфигурируйте соединение с Elasticsearch.
 
+Заходим на сервер Kibana,и настраиваем конфиг для подключени к elasticsearch.
+
+```
+    sudo nano /etc/kibana/kibana.yml
+    ```
+  Вставить адрес elasticsearch 
+
 ![web1](https://github.com/matiz86/sys-diplom/blob/main/image/kibana.png)
 
 ![web1](https://github.com/matiz86/sys-diplom/blob/main/image/kibana1.png)
 
+## http://51.250.42.245:5601/app/home#/ -Kibana
+
 
 ### Сеть
 Разверните один VPC. Сервера web, Elasticsearch поместите в приватные подсети. Сервера Zabbix, Kibana, application load balancer определите в публичную подсеть.
+
+![web1](https://github.com/matiz86/sys-diplom/blob/main/image/vpc.png)
+
 
 Настройте [Security Groups](https://cloud.yandex.com/docs/vpc/concepts/security-groups) соответствующих сервисов на входящий трафик только к нужным портам.
 
