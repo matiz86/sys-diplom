@@ -153,6 +153,8 @@ sudo filebeat -e
 
 Настройте ВМ с публичным адресом, в которой будет открыт только один порт — ssh. Настройте все security groups на разрешение входящего ssh из этой security group. Эта вм будет реализовывать концепцию bastion host. Потом можно будет подключаться по ssh ко всем хостам через этот хост.
 
+![web1](https://github.com/matiz86/sys-diplom/blob/main/image/bast.png)
+
 ![web1](https://github.com/matiz86/sys-diplom/blob/main/image/bastion.png)
 
 В файле  hosts пропысываем правило для подключения к хостам через bastion
