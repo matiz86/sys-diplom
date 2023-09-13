@@ -97,9 +97,7 @@ resource "yandex_compute_instance" "zabbix" {
     user-data = "${file("./meta.txt")}"
   }
 
-  scheduling_policy {
-    preemptible = true
-  }
+
 }
 
 
@@ -166,9 +164,6 @@ resource "yandex_compute_instance" "kibana" {
     user-data = "${file("./meta.txt")}"
   }
 
-  scheduling_policy {
-    preemptible = true
-  }
 
 }
 
