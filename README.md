@@ -129,7 +129,8 @@ sudo filebeat -e
 
 Заходим на сервер Kibana,и настраиваем конфиг для подключени к elasticsearch.
 
-```
+     
+    ```
     sudo nano /etc/kibana/kibana.yml
     ```
   Вставить адрес elasticsearch 
