@@ -139,22 +139,35 @@ sudo filebeat -e
 
 ![web1](https://github.com/matiz86/sys-diplom/blob/main/image/kibana1.png)
 
-     http://51.250.42.245:5601/app/home#/  Kibana
 
+
+     http://51.250.42.245:5601  
+         
 
 ### Сеть
 Разверните один VPC. Сервера web, Elasticsearch поместите в приватные подсети. Сервера Zabbix, Kibana, application load balancer определите в публичную подсеть.
 
 ![web1](https://github.com/matiz86/sys-diplom/blob/main/image/vpc.png)
 
-
 Настройте [Security Groups](https://cloud.yandex.com/docs/vpc/concepts/security-groups) соответствующих сервисов на входящий трафик только к нужным портам.
 
 Настройте ВМ с публичным адресом, в которой будет открыт только один порт — ssh. Настройте все security groups на разрешение входящего ssh из этой security group. Эта вм будет реализовывать концепцию bastion host. Потом можно будет подключаться по ssh ко всем хостам через этот хост.
 
+![web1](https://github.com/matiz86/sys-diplom/blob/main/image/bastion.png)
+
+В файле  hosts пропысываем правило для подключения к хостам через bastion
+
+![web1](https://github.com/matiz86/sys-diplom/blob/main/image/rule.png)
+
+
 ### Резервное копирование
 
 Создайте snapshot дисков всех ВМ. Ограничьте время жизни snaphot в неделю. Сами snaphot настройте на ежедневное копирование.
+
+![web1](https://github.com/matiz86/sys-diplom/blob/main/image/snapshot.png)
+
+
+![web1](https://github.com/matiz86/sys-diplom/blob/main/image/snap.png)
 
 ### Дополнительно
 Не входит в минимальные требования. 
