@@ -90,23 +90,23 @@ Cоздайте ВМ, разверните на ней Elasticsearch. Устан
 
 Так как одним из заданий была реализация концепции bastion host,то на сервера будем заходить через него.
 Пример доступа к web-1 и web-2
-
+```
 ssh -i ~/.ssh/id_rsa -J user@51.250.43.12 user@10.1.0.10
-
+```
 ssh -i ~/.ssh/id_rsa -J user@51.250.43.12 user@10.2.0.10 
-
-sudo nano /etc/filebeat/filebeat.yml вставляем ip elastic и публичный ip kibana.
-
+```
+sudo nano /etc/filebeat/filebeat.yml (вставляем ip elastic и публичный ip kibana)
+```
 sudo nano /etc/filebeat/modules.d/nginx.yml.disabled (Заменить false на true в блоках error и access)
- 
+```
 sudo systemctl restart filebeat
-
+```
 sudo filebeat modules enable nginx
-
+```
 sudo filebeat setup
-
+```
 sudo filebeat -e 
-
+```
 ******************************************************************************************************
 ![web1](https://github.com/matiz86/sys-diplom/blob/main/image/filebeat1.png)
 
