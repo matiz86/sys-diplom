@@ -67,7 +67,7 @@
 Протестируйте сайт
 `curl -v 158.160.113.237:80`
 
-##158.160.113.237:80 - сайт открывается с публичного IP балансира
+## 158.160.113.237:80 - сайт открывается с публичного IP балансира
 
 ![web1](https://github.com/matiz86/sys-diplom/blob/main/image/alb.png) 
 
@@ -138,7 +138,7 @@ sudo filebeat -e
 
 ![web1](https://github.com/matiz86/sys-diplom/blob/main/image/kibana1.png)
 
-## http://51.250.42.245:5601/app/home#/ -Kibana
+![sdfsd](http://51.250.42.245:5601/app/home#/)  Kibana
 
 
 ### Сеть
