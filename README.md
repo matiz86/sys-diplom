@@ -76,6 +76,8 @@
 
 ![web1](https://github.com/matiz86/sys-diplom/blob/main/image/zabbix.png)
 
+51.250.46.187:8080
+
 
 Настройте дешборды с отображением метрик, минимальный набор — по принципу USE (Utilization, Saturation, Errors) для CPU, RAM, диски, сеть, http запросов к веб-серверам. Добавьте необходимые tresholds на соответствующие графики.
 
@@ -141,7 +143,7 @@ sudo filebeat -e
 
 
 
-     http://51.250.42.245:5601  
+     http://51.250.37.5:5601  
          
 
 ### Сеть
