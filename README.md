@@ -76,10 +76,12 @@
 
 ![web1](https://github.com/matiz86/sys-diplom/blob/main/image/zabbix.png)
 
-51.250.47.56:8080
+51.250.32.138:8080
 
 
 Настройте дешборды с отображением метрик, минимальный набор — по принципу USE (Utilization, Saturation, Errors) для CPU, RAM, диски, сеть, http запросов к веб-серверам. Добавьте необходимые tresholds на соответствующие графики.
+
+![web1](https://github.com/matiz86/sys-diplom/blob/main/image/dashboard.png)
 
 ### Логи
 Cоздайте ВМ, разверните на ней Elasticsearch. Установите filebeat в ВМ к веб-серверам, настройте на отправку access.log, error.log nginx в Elasticsearch.
@@ -95,10 +97,10 @@ Cоздайте ВМ, разверните на ней Elasticsearch. Устан
 Так как одним из заданий была реализация концепции bastion host,то на сервера будем заходить через него.
 Пример доступа к web-1 и web-2
 ```
-ssh -i ~/.ssh/id_rsa -J user@51.250.43.12 user@10.1.0.10
+ssh -i ~/.ssh/id_rsa -J user@51.250.38.108 user@10.1.0.10
 ```
 ```
-ssh -i ~/.ssh/id_rsa -J user@51.250.43.12 user@10.2.0.10 
+ssh -i ~/.ssh/id_rsa -J user@51.250.38.108 user@10.2.0.10 
 ```
 ```
 sudo nano /etc/filebeat/filebeat.yml
@@ -143,7 +145,7 @@ sudo filebeat -e
 
 
 
-     http://51.250.39.153:5601  
+     http://51.250.34.42:5601  
          
 
 ### Сеть
